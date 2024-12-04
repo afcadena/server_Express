@@ -1,45 +1,86 @@
-import { Request, Response } from 'express'
+import { Request, Response } from "express";
+import Usuario from "../models/users";
 
-export const getUsuarios = (req: Request, res: Response) => {
-    res.json({
-        msg: 'Servicio de consulta de usuarios'
-    })
-}
+export const getUsuarios = async (req: Request, res: Response) => {
+    try {
+        const usuarios = await Usuario.findAll();
+        res.json(usuarios);
+    } catch (error) {
+        res.status(500).json({
+            msg: "Error al obtener usuarios",
+            error,
+        });
+    }
+};
 
-export const getUsuario = (req: Request, res: Response) => {
-
+export const getUsuario = async (req: Request, res: Response) => {
     const { id } = req.params;
-    res.json({
-        msg: 'Servicio de consulta de usuario específico',
-        id
-    })
-}
+    try {
+        const usuario = await Usuario.findByPk(id);
+        if (!usuario) {
+            return res.status(404).json({
+                msg: `No existe un usuario con el id ${id}`,
+            });
+        }
+        res.json(usuario);
+    } catch (error) {
+        res.status(500).json({
+            msg: "Error al obtener el usuario",
+            error,
+        });
+    }
+};
 
-export const postUsuario = (req: Request, res: Response) => {
-    
+export const postUsuario = async (req: Request, res: Response) => {
     const { body } = req;
-    res.json({
-        msg: 'Servicio de construcción y agregado de usuarios',
-        body
-    })
-}
+    try {
+        const usuario = await Usuario.create(body);
+        res.json(usuario);
+    } catch (error) {
+        res.status(500).json({
+            msg: "Error al crear usuario",
+            error,
+        });
+    }
+};
 
-export const putUsuario = (req: Request, res: Response) => {
-    
+export const putUsuario = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { body } = req;
-    res.json({
-        msg: 'Servicio para editar usuarios por id específico',
-        body
-    })
-}
+    try {
+        const usuario = await Usuario.findByPk(id);
+        if (!usuario) {
+            return res.status(404).json({
+                msg: `No existe un usuario con el id ${id}`,
+            });
+        }
+        await usuario.update(body);
+        res.json(usuario);
+    } catch (error) {
+        res.status(500).json({
+            msg: "Error al actualizar usuario",
+            error,
+        });
+    }
+};
 
-export const deleteUsuario = (req: Request, res: Response) => {
-    
+export const deleteUsuario = async (req: Request, res: Response) => {
     const { id } = req.params;
-
-    res.json({
-        msg: 'Servicio para eliminación de usuarios por id específico',
-        id
-    })
-}
+    try {
+        const usuario = await Usuario.findByPk(id);
+        if (!usuario) {
+            return res.status(404).json({
+                msg: `No existe un usuario con el id ${id}`,
+            });
+        }
+        await usuario.destroy();
+        res.json({
+            msg: `El usuario con id ${id} fue eliminado`,
+        });
+    } catch (error) {
+        res.status(500).json({
+            msg: "Error al eliminar usuario",
+            error,
+        });
+    }
+};
